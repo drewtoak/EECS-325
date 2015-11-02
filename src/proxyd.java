@@ -11,7 +11,9 @@ import java.util.HashMap;
  */
 public class proxyd {
 
+    // Make a HashMap to hold the Address of the host that was previously visited.
     static HashMap<String, InetAddress> cachedAddress;
+
     /**
      * The main method that takes in an argument from the terminal and listens for a request from the
      * web browser using the proxy.
@@ -20,6 +22,7 @@ public class proxyd {
      */
     public static void main(String[] args) throws IOException {
 
+        // Initialize the cache variable.
         proxyd.cachedAddress = new HashMap<>();
 
         // Make a variable called serverSocket and initially set it to null.

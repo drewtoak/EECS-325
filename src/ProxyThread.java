@@ -120,19 +120,47 @@ public class ProxyThread extends Thread{
      * @throws UnknownHostException
      */
     private InetAddress getHostAddress(String hostName) throws UnknownHostException {
+        // If the host name already exists then return the address.
         if (proxyd.cachedAddress.containsKey(hostName)) {
             return proxyd.cachedAddress.get(hostName);
         }
+        // If the host name does not already exist, find the address of the host name and add it to the cache.
         else {
             InetAddress address = InetAddress.getByName(hostName);
 
             proxyd.cachedAddress.put(hostName,address);
+            CacheThread cache = new CacheThread(hostName);
+            cache.start();
 
             String hostAddress = address.getHostAddress();
             System.out.println("Host Address: " + hostAddress);
             System.out.flush();
 
             return address;
+        }
+    }
+
+    /**
+     * This thread allows for the cache to be stored for 30 sec.
+     */
+    private static class CacheThread extends Thread {
+        String hostName;
+
+        public CacheThread(String hostName) {
+            this.hostName = hostName;
+        }
+
+        // Remove the cached host name and address after 30 seconds.
+        public void run() {
+            try {
+                Thread.sleep(30000);
+            }
+            catch (InterruptedException e) {
+                System.err.println("Reuse of resolution has been Interrupted");
+            }
+            finally {
+                proxyd.cachedAddress.remove(hostName);
+            }
         }
     }
 
