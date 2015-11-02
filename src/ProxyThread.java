@@ -111,20 +111,6 @@ public class ProxyThread extends Thread{
     }
 
     /**
-     * Get the address based off the found host name.
-     * @param hostName -- the host name within the request
-     * @return the address of the host server
-     * @throws UnknownHostException
-     */
-    private String getHostAddress(String hostName) throws UnknownHostException {
-        InetAddress address = InetAddress.getByName(hostName);
-
-        String hostAddress = address.getHostAddress();
-        System.out.println("Host Address: " + hostAddress);
-        return hostAddress;
-    }
-
-    /**
      * This thread retrieves the response from the host server.
      */
     private static class ResponseThread extends Thread {
