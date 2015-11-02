@@ -38,8 +38,11 @@ public class ProxyThread extends Thread{
                 // Get the host name found with in the requested stream.
                 hostName = getHostName(request, requestLength, hostName);
 
-                // Set global Socket variable server to be a Socket with the given host name and 80 as the port#, for http.
-                server = new Socket(hostName, 80);
+                // Get the host address found with the host name.
+                InetAddress hostAddress = getHostAddress(hostName);
+
+                // Set global Socket variable server to be a Socket with the given host address and 80 as the port#, for http.
+                server = new Socket(hostAddress, 80);
 
                 // Set the output stream to the server
                 streamToServer = server.getOutputStream();
@@ -116,12 +119,21 @@ public class ProxyThread extends Thread{
      * @return the address of the host server
      * @throws UnknownHostException
      */
-    private String getHostAddress(String hostName) throws UnknownHostException {
-        InetAddress address = InetAddress.getByName(hostName);
+    private InetAddress getHostAddress(String hostName) throws UnknownHostException {
+        if (proxyd.cachedAddress.containsKey(hostName)) {
+            return proxyd.cachedAddress.get(hostName);
+        }
+        else {
+            InetAddress address = InetAddress.getByName(hostName);
 
-        String hostAddress = address.getHostAddress();
-        System.out.println("Host Address: " + hostAddress);
-        return hostAddress;
+            proxyd.cachedAddress.put(hostName,address);
+
+            String hostAddress = address.getHostAddress();
+            System.out.println("Host Address: " + hostAddress);
+            System.out.flush();
+
+            return address;
+        }
     }
 
     /**

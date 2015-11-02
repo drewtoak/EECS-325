@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 
 /**
  * This is a simple proxy server.
@@ -10,6 +11,7 @@ import java.net.*;
  */
 public class proxyd {
 
+    static HashMap<String, InetAddress> cachedAddress;
     /**
      * The main method that takes in an argument from the terminal and listens for a request from the
      * web browser using the proxy.
@@ -17,6 +19,8 @@ public class proxyd {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+
+        proxyd.cachedAddress = new HashMap<>();
 
         // Make a variable called serverSocket and initially set it to null.
         ServerSocket serverSocket = null;

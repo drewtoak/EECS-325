@@ -1,0 +1,28 @@
+Andrew Hwang
+ath50
+EECS 325 Project 1
+
+a)  I am using port 5032.
+
+b)  Be in the home_directory/project1/src/ and compile two java files,
+    "javac proxyd.java" & "javac ProxyThread.java".
+
+    Then run the main file with the argument, "java proxyd -port 5032".
+    After this command, it should read:
+      ServerSocket[addr=0.0.0.0/0.0.0.0,localport=5032]
+      Waiting for request.
+      port number:5032
+
+    Then go to your browser and type in the website of your choice, and
+    the simple proxy should load the page.
+
+c)  Tested Browsers:
+      Google Chrome
+      Safari
+
+d)  Tested Websites:
+      www.cnn.com
+      www.theverge.com
+      www.cnet.com
+      www.engadget.com
+      www.mlb.com
