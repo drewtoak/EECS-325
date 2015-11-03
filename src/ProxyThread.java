@@ -29,17 +29,17 @@ public class ProxyThread extends Thread{
             InputStream streamFromClient = client.getInputStream();
             OutputStream streamToServer = null;
 
-            String hostName = "";
+            String serverName = "";
 
             // Set an int variable to know the number of bytes of data within a requested stream from the client.
             int requestLength;
             // Constantly read the input stream until there are no more requests from the client.
             while ((requestLength = streamFromClient.read(request)) != -1) {
                 // Get the host name found with in the requested stream.
-                hostName = getHostName(request, requestLength, hostName);
+                serverName = getServerName(request, requestLength, serverName);
 
                 // Get the host address found with the host name.
-                InetAddress hostAddress = getHostAddress(hostName);
+                InetAddress hostAddress = getServerAddress(serverName);
 
                 // Set global Socket variable server to be a Socket with the given host address and 80 as the port#, for http.
                 server = new Socket(hostAddress, 80);
@@ -86,15 +86,15 @@ public class ProxyThread extends Thread{
 
     /**
      * This method gets the host name from the request stream.
-     * @param buffer -- the byte data of the request stream
+     * @param request -- the byte data of the request stream
      * @param length -- the number of bytes in the byte data array
-     * @param prevHostName -- the name of the previous host
+     * @param prevServerName -- the name of the previous host
      * @return the host name from the request
      * @throws IOException
      */
-    private String getHostName(byte[] buffer, int length, String prevHostName) throws IOException {
+    private String getServerName(byte[] request, int length, String prevServerName) throws IOException {
         // Convert the bytes of data to a String
-        String clientRequest = new String(buffer, 0, length);
+        String clientRequest = new String(request, 0, length);
 
         System.out.println("Request:");
         System.out.println(clientRequest);
@@ -107,43 +107,43 @@ public class ProxyThread extends Thread{
             if (requestLines[index].contains("Host:")) {
                 String[] contents = requestLines[1].split(" ");
 
-                String hostName = contents[1].trim();
-                System.out.println("Host Name: " + hostName);
-                return hostName;
+                String serverName = contents[1].trim();
+                System.out.println("Server Name: " + serverName);
+                return serverName;
             }
             index++;
         }
 
-        System.err.println("The Request is missing its hostname");
-        return prevHostName;
+        System.err.println("The Request is missing its server name");
+        return prevServerName;
     }
 
     /**
      * Get the address based off the found host name.
-     * @param hostName -- the host name within the request
+     * @param serverName -- the host name within the request
      * @return the address of the host server
      * @throws UnknownHostException
      */
-    private InetAddress getHostAddress(String hostName) throws UnknownHostException {
+    private InetAddress getServerAddress(String serverName) throws UnknownHostException {
         // If the host name already exists then return the address.
-        if (proxyd.cachedAddress.containsKey(hostName)) {
-            InetAddress address = proxyd.cachedAddress.get(hostName);
+        if (proxyd.cachedAddress.containsKey(serverName)) {
+            InetAddress address = proxyd.cachedAddress.get(serverName);
 
-            String hostAddress =  address.getHostAddress();
-            System.out.println("Host Address found in Cache: " + hostAddress);
+            String serverAddress =  address.getHostAddress();
+            System.out.println("Server Address found in Cache: " + serverAddress);
 
-            return proxyd.cachedAddress.get(hostName);
+            return proxyd.cachedAddress.get(serverName);
         }
         // If the host name does not already exist, find the address of the host name and add it to the cache.
         else {
-            InetAddress address = InetAddress.getByName(hostName);
+            InetAddress address = InetAddress.getByName(serverName);
 
-            proxyd.cachedAddress.put(hostName,address);
-            CacheThread cache = new CacheThread(hostName);
+            proxyd.cachedAddress.put(serverName, address);
+            CacheThread cache = new CacheThread(serverName);
             cache.start();
 
-            String hostAddress = address.getHostAddress();
-            System.out.println("Host Address: " + hostAddress + " Cached");
+            String serverAddress = address.getHostAddress();
+            System.out.println("Server Address: " + serverAddress + " Cached");
 
             return address;
         }
@@ -153,11 +153,11 @@ public class ProxyThread extends Thread{
      * This thread allows for the cache to be stored for 30 sec.
      */
     private static class CacheThread extends Thread {
-        String hostName;
+        String serverName;
         final int reuse = 30000;
 
-        public CacheThread(String hostName) {
-            this.hostName = hostName;
+        public CacheThread(String serverName) {
+            this.serverName = serverName;
         }
 
         // Remove the cached host name and address after 30 seconds.
@@ -169,7 +169,7 @@ public class ProxyThread extends Thread{
                 System.err.println("Reuse of resolution has been Interrupted");
             }
             finally {
-                proxyd.cachedAddress.remove(hostName);
+                proxyd.cachedAddress.remove(serverName);
             }
         }
     }
