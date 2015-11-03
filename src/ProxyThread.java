@@ -59,7 +59,12 @@ public class ProxyThread extends Thread{
                 response.start();
             }
             // Close the connection with the output stream to the server, since there are no more requests.
-            streamToServer.close();
+            try {
+                streamToServer.close();
+            }
+            catch (NullPointerException e) {
+                System.err.println("No request to Server.");
+            }
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -122,6 +127,11 @@ public class ProxyThread extends Thread{
     private InetAddress getHostAddress(String hostName) throws UnknownHostException {
         // If the host name already exists then return the address.
         if (proxyd.cachedAddress.containsKey(hostName)) {
+            InetAddress address = proxyd.cachedAddress.get(hostName);
+
+            String hostAddress =  address.getHostAddress();
+            System.out.println("Host Address found in Cache: " + hostAddress);
+
             return proxyd.cachedAddress.get(hostName);
         }
         // If the host name does not already exist, find the address of the host name and add it to the cache.
@@ -133,8 +143,7 @@ public class ProxyThread extends Thread{
             cache.start();
 
             String hostAddress = address.getHostAddress();
-            System.out.println("Host Address: " + hostAddress);
-            System.out.flush();
+            System.out.println("Host Address: " + hostAddress + " Cached");
 
             return address;
         }
@@ -145,6 +154,7 @@ public class ProxyThread extends Thread{
      */
     private static class CacheThread extends Thread {
         String hostName;
+        final int reuse = 30000;
 
         public CacheThread(String hostName) {
             this.hostName = hostName;
@@ -153,7 +163,7 @@ public class ProxyThread extends Thread{
         // Remove the cached host name and address after 30 seconds.
         public void run() {
             try {
-                Thread.sleep(30000);
+                Thread.sleep(reuse);
             }
             catch (InterruptedException e) {
                 System.err.println("Reuse of resolution has been Interrupted");
